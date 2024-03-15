@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import {useDispatch , useSelector} from 'react-redux'
+import { signInFailure , signInStart , signInSuccess } from "../redux/user/userSlice.js";
 
-export default function SignUp() {
+export default function SignIn() {
   const [FormData, setFormData] = useState({});
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const {loading , error} = useSelector((state) => state.user)
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const handleChange = (e) => {
     setFormData({
       ...FormData,
@@ -16,41 +18,31 @@ export default function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      setLoading(true);
-      const res = await fetch('/api/auth/signup', {
-        method: 'POST',
+      dispatch(signInStart())
+      const res = await fetch("/api/auth/signIn", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(FormData),
       });
       const data = await res.json();
       console.log(data);
       if (data.success === false) {
-        setLoading(false);
-        setError(data.message);
+        dispatch(signInFailure(data.message))
         return;
       }
-      setLoading(false);
-      setError(null);
-      navigate('/signIn');
+      dispatch(signInSuccess(data))
+      navigate("/");
     } catch (error) {
-      setLoading(false);
-      setError(error.message);
+      dispatch(signInFailure(error.message))
     }
   };
 
   return (
     <div className="p-3 max-w-lg mx-auto">
-      <h1 className="text-3xl text-center font-semibold my-7">Sign Up</h1>
+      <h1 className="text-3xl text-center font-semibold my-7">Sign In</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <input
-          type="text"
-          placeholder="username"
-          className="border p-3 rounded-lg"
-          id="username"
-          onChange={handleChange}
-        />
         <input
           type="email"
           placeholder="email"
@@ -67,18 +59,19 @@ export default function SignUp() {
         />
 
         <button
-        disabled = {loading}
-        className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80">
-          {loading ? "enter info" : "sign up"}
+          disabled={loading}
+          className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80"
+        >
+          {loading ? "Loading..." : "sign in"}
         </button>
       </form>
       <div className="flex gap-2 mt-5">
-        <p>Have an account?</p>
-        <Link to={"/signIn"}>
-          <span className="text-blue-700">SignIn</span>
+        <p>Don't Have an account?</p>
+        <Link to={"/signUp"}>
+          <span className="text-blue-700">Sign Up</span>
         </Link>
       </div>
-      {error && <p className='text-red-500 mt-5'>{error}</p>}
+      {error && <p className="text-red-500 mt-5">{error}</p>}
     </div>
   );
 }
