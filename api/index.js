@@ -3,6 +3,7 @@ import mongoose from "mongoose"
 import dotenv from "dotenv"
 import userRouter from "./routes/user.route.js"
 import authRouter from "./routes/auth.route.js"
+import cookieParser from 'cookie-parser';
 dotenv.config()
 
 mongoose.connect("mongodb+srv://srishanth:srishanth_m@cluster0.fojwfwp.mongodb.net/NexHomes?retryWrites=true&w=majority&appName=Cluster0")
@@ -11,6 +12,8 @@ mongoose.connect("mongodb+srv://srishanth:srishanth_m@cluster0.fojwfwp.mongodb.n
 
 const app = express()
 app.use(express.json())
+
+app.use(cookieParser());
 
 app.listen(3000, () => {
     console.log("app is listening at port 3000")
